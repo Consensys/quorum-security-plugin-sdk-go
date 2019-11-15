@@ -198,24 +198,24 @@ func (m *MockAccountAccessDecisionManagerClient) EXPECT() *MockAccountAccessDeci
 	return m.recorder
 }
 
-// IsAuthorized mocks base method
-func (m *MockAccountAccessDecisionManagerClient) IsAuthorized(ctx context.Context, in *proto.AccountAccess_Request, opts ...grpc.CallOption) (*proto.AccountAccess_Response, error) {
+// AuthorizeAccountAccess mocks base method
+func (m *MockAccountAccessDecisionManagerClient) AuthorizeAccountAccess(ctx context.Context, in *proto.AccountAccess_Request, opts ...grpc.CallOption) (*proto.AccountAccess_Response, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx, in}
 	for _, a := range opts {
 		varargs = append(varargs, a)
 	}
-	ret := m.ctrl.Call(m, "IsAuthorized", varargs...)
+	ret := m.ctrl.Call(m, "AuthorizeAccountAccess", varargs...)
 	ret0, _ := ret[0].(*proto.AccountAccess_Response)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// IsAuthorized indicates an expected call of IsAuthorized
-func (mr *MockAccountAccessDecisionManagerClientMockRecorder) IsAuthorized(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+// AuthorizeAccountAccess indicates an expected call of AuthorizeAccountAccess
+func (mr *MockAccountAccessDecisionManagerClientMockRecorder) AuthorizeAccountAccess(ctx, in interface{}, opts ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, in}, opts...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsAuthorized", reflect.TypeOf((*MockAccountAccessDecisionManagerClient)(nil).IsAuthorized), varargs...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AuthorizeAccountAccess", reflect.TypeOf((*MockAccountAccessDecisionManagerClient)(nil).AuthorizeAccountAccess), varargs...)
 }
 
 // MockAccountAccessDecisionManagerServer is a mock of AccountAccessDecisionManagerServer interface
@@ -241,19 +241,19 @@ func (m *MockAccountAccessDecisionManagerServer) EXPECT() *MockAccountAccessDeci
 	return m.recorder
 }
 
-// IsAuthorized mocks base method
-func (m *MockAccountAccessDecisionManagerServer) IsAuthorized(arg0 context.Context, arg1 *proto.AccountAccess_Request) (*proto.AccountAccess_Response, error) {
+// AuthorizeAccountAccess mocks base method
+func (m *MockAccountAccessDecisionManagerServer) AuthorizeAccountAccess(arg0 context.Context, arg1 *proto.AccountAccess_Request) (*proto.AccountAccess_Response, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "IsAuthorized", arg0, arg1)
+	ret := m.ctrl.Call(m, "AuthorizeAccountAccess", arg0, arg1)
 	ret0, _ := ret[0].(*proto.AccountAccess_Response)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// IsAuthorized indicates an expected call of IsAuthorized
-func (mr *MockAccountAccessDecisionManagerServerMockRecorder) IsAuthorized(arg0, arg1 interface{}) *gomock.Call {
+// AuthorizeAccountAccess indicates an expected call of AuthorizeAccountAccess
+func (mr *MockAccountAccessDecisionManagerServerMockRecorder) AuthorizeAccountAccess(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsAuthorized", reflect.TypeOf((*MockAccountAccessDecisionManagerServer)(nil).IsAuthorized), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AuthorizeAccountAccess", reflect.TypeOf((*MockAccountAccessDecisionManagerServer)(nil).AuthorizeAccountAccess), arg0, arg1)
 }
 
 // MockContractAccessDecisionManagerClient is a mock of ContractAccessDecisionManagerClient interface
@@ -279,24 +279,24 @@ func (m *MockContractAccessDecisionManagerClient) EXPECT() *MockContractAccessDe
 	return m.recorder
 }
 
-// IsAuthorized mocks base method
-func (m *MockContractAccessDecisionManagerClient) IsAuthorized(ctx context.Context, in *proto.ContractAccess_Request, opts ...grpc.CallOption) (*proto.ContractAccess_Response, error) {
+// AuthorizeContractAccess mocks base method
+func (m *MockContractAccessDecisionManagerClient) AuthorizeContractAccess(ctx context.Context, in *proto.ContractAccess_Request, opts ...grpc.CallOption) (*proto.ContractAccess_Response, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx, in}
 	for _, a := range opts {
 		varargs = append(varargs, a)
 	}
-	ret := m.ctrl.Call(m, "IsAuthorized", varargs...)
+	ret := m.ctrl.Call(m, "AuthorizeContractAccess", varargs...)
 	ret0, _ := ret[0].(*proto.ContractAccess_Response)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// IsAuthorized indicates an expected call of IsAuthorized
-func (mr *MockContractAccessDecisionManagerClientMockRecorder) IsAuthorized(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+// AuthorizeContractAccess indicates an expected call of AuthorizeContractAccess
+func (mr *MockContractAccessDecisionManagerClientMockRecorder) AuthorizeContractAccess(ctx, in interface{}, opts ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, in}, opts...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsAuthorized", reflect.TypeOf((*MockContractAccessDecisionManagerClient)(nil).IsAuthorized), varargs...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AuthorizeContractAccess", reflect.TypeOf((*MockContractAccessDecisionManagerClient)(nil).AuthorizeContractAccess), varargs...)
 }
 
 // MockContractAccessDecisionManagerServer is a mock of ContractAccessDecisionManagerServer interface
@@ -322,17 +322,17 @@ func (m *MockContractAccessDecisionManagerServer) EXPECT() *MockContractAccessDe
 	return m.recorder
 }
 
-// IsAuthorized mocks base method
-func (m *MockContractAccessDecisionManagerServer) IsAuthorized(arg0 context.Context, arg1 *proto.ContractAccess_Request) (*proto.ContractAccess_Response, error) {
+// AuthorizeContractAccess mocks base method
+func (m *MockContractAccessDecisionManagerServer) AuthorizeContractAccess(arg0 context.Context, arg1 *proto.ContractAccess_Request) (*proto.ContractAccess_Response, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "IsAuthorized", arg0, arg1)
+	ret := m.ctrl.Call(m, "AuthorizeContractAccess", arg0, arg1)
 	ret0, _ := ret[0].(*proto.ContractAccess_Response)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// IsAuthorized indicates an expected call of IsAuthorized
-func (mr *MockContractAccessDecisionManagerServerMockRecorder) IsAuthorized(arg0, arg1 interface{}) *gomock.Call {
+// AuthorizeContractAccess indicates an expected call of AuthorizeContractAccess
+func (mr *MockContractAccessDecisionManagerServerMockRecorder) AuthorizeContractAccess(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsAuthorized", reflect.TypeOf((*MockContractAccessDecisionManagerServer)(nil).IsAuthorized), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AuthorizeContractAccess", reflect.TypeOf((*MockContractAccessDecisionManagerServer)(nil).AuthorizeContractAccess), arg0, arg1)
 }
