@@ -64,9 +64,9 @@ jobs:
           git status
       - name: Commit changes if any
         run: |
-          git config --local user.name "Trung Nguyen"
-          git config --local user.email "24930+trung@users.noreply.github.com"
-          git commit -am "Auto update" || echo
+          git config --local user.name "quorumbot"
+          git config --local user.email "46820074+quorumbot@users.noreply.github.com"
+          git commit -am "SDK Update from $TRIGGER_REPO@$TRIGGER_REASON" || echo
       - name: Push changes if any
         uses: ad-m/github-push-action@master
         with:
