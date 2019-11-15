@@ -1,18 +1,26 @@
-# $GITHUB_WORKSPACE/src -> this project files
-# $GITHUB_WORKSPACE/grpc_defs -> proto files
-# $GITHUB_WORKSPACE/tools -> tools for code generation
 name: SDK Generation
 on:
   repository_dispatch:
     types: [proto-files-updated]
 env:
+  PROTOC_VERSION: 3.9.1
   TRIGGER_REPO: ${{ github.event.client_payload.repo }}
   TRIGGER_REASON: ${{ github.event.client_payload.sha }}
 jobs:
-  build:
+  run:
     name: Run
     runs-on: ubuntu-latest
+    env:
+      GRPC_DEFS_DIR_NAME: grpc_defs
     steps:
+      - name: Set up the environment
+        run: |
+          tools_dir=${{ runner.workspace }}/tools
+          grpc_defs_dir=${{ runner.workspace }}/${{ env.GRPC_DEFS_DIR_NAME }}
+          mkdir -p $tools_dir
+          echo "::set-env name=TOOLS_DIR::$tools_dir"
+          echo "::set-env name=GRPC_DEFS_DIR::$grpc_defs_dir"
+          echo "::add-path::$tools_dir/bin"
       - name: Set up Go 1.13
         uses: actions/setup-go@v1
         with:
@@ -27,22 +35,28 @@ jobs:
           repository: QuorumEngineering/quorum-plugin-definitions
           ref: refs/heads/simple
           token: ${{ secrets.QUORUMBOT_PAT }}
-          path: grpc_defs
+          path: ${{ env.GRPC_DEFS_DIR_NAME }}
+#       Currently actions/cache doesn't support respository_dispatch event: https://github.com/actions/cache/issues/63
+#       - name: Cache protoc compiler and tools
+#         id: cache-tools
+#         uses: actions/cache@v1
+#         with:
+#           path: ../tools
+#           key: ${{ runner.os }}-tools-${{ PROTOC_VERSION }}
       - name: Install protoc compiler and tools
+#         if: steps.cache-tools.outputs.cache-hit != 'true'
+        env:
+          GOPATH: ${{ env.TOOLS_DIR }}
         run: |
-          mkdir -p ../tools && cd ../tools
-          curl -sS -L https://github.com/protocolbuffers/protobuf/releases/download/v3.9.1/protoc-3.9.1-linux-x86_64.zip -o protoc.zip && unzip -q protoc.zip
-          echo "protoc version: " && ./bin/protoc --version
-          export GOPATH=$(pwd)
+          cd ${{ env.TOOLS_DIR }} && curl -sS -L https://github.com/protocolbuffers/protobuf/releases/download/v${{ env.PROTOC_VERSION }}/protoc-${{ env.PROTOC_VERSION }}-linux-x86_64.zip -o protoc.zip && unzip -q protoc.zip
           go get github.com/golang/protobuf/protoc-gen-go
           go get github.com/golang/mock/mockgen
           go get golang.org/x/tools/cmd/goimports
-          ls -lha ./bin
       - name: Generate stubs and mocks
         run: |
-          export PATH=$PATH:../tools/bin/ && mkdir -p proto && mkdir -p mock_proto
-          protoc -I ../grpc_defs -I ../grpc_defs/vendor --go_out=plugins=grpc:proto ../grpc_defs/init.proto ../grpc_defs/security.proto
-          export GOPATH=$(pwd)/..
+          mkdir -p proto && mkdir -p mock_proto
+          echo "protoc version: $(protoc --version)"
+          protoc -I ${{ env.GRPC_DEFS_DIR }} -I ${{ env.GRPC_DEFS_DIR }}/vendor --go_out=plugins=grpc:proto ${{ env.GRPC_DEFS_DIR }}/init.proto ${{ env.GRPC_DEFS_DIR }}/security.proto
           mockgen -package mock_proto -destination mock_proto/mock_initializer.go -source proto/init.pb.go
           mockgen -package mock_proto -destination mock_proto/mock_security.go    -source proto/security.pb.go
           goimports -w ./
@@ -50,9 +64,9 @@ jobs:
           git status
       - name: Commit changes if any
         run: |
-          git config --local user.name "quorumbot"
-          git config --local user.email "46820074+quorumbot@users.noreply.github.com"
-          git commit -am "SDK Update from $TRIGGER_REPO $TRIGGER_REASON" || echo
+          git config --local user.name "Trung Nguyen"
+          git config --local user.email "24930+trung@users.noreply.github.com"
+          git commit -am "Auto update" || echo
       - name: Push changes if any
         uses: ad-m/github-push-action@master
         with:
