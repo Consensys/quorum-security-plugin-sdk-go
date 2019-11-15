@@ -33,7 +33,7 @@ jobs:
         uses: actions/checkout@v1
         with:
           repository: QuorumEngineering/quorum-plugin-definitions
-          ref: refs/heads/simple
+          ref: refs/heads/master
           token: ${{ secrets.QUORUMBOT_PAT }}
           path: ${{ env.GRPC_DEFS_DIR_NAME }}
 #       Currently actions/cache doesn't support respository_dispatch event: https://github.com/actions/cache/issues/63
