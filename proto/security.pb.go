@@ -26,8 +26,8 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
 
-//
-// This data is used to configure TLS for `geth` RPC Servers
+//*
+// A wrapper message to logically group other messages
 type TLSConfiguration struct {
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -59,6 +59,7 @@ func (m *TLSConfiguration) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_TLSConfiguration proto.InternalMessageInfo
 
+// It's an empty Request received by RPC service
 type TLSConfiguration_Request struct {
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -90,6 +91,7 @@ func (m *TLSConfiguration_Request) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_TLSConfiguration_Request proto.InternalMessageInfo
 
+// Response from RPC service
 type TLSConfiguration_Response struct {
 	Data                 *TLSConfiguration_Data `protobuf:"bytes,1,opt,name=data,proto3" json:"data,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}               `json:"-"`
@@ -522,6 +524,8 @@ func (m *ContractSecurityAttributes) GetAttributes() []*ContractSecurityAttribut
 	return nil
 }
 
+//*
+// A wrapper message to logically group other messages
 type AccountAccess struct {
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
