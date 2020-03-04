@@ -6,6 +6,7 @@ env:
   PROTOC_VERSION: 3.9.1
   PROTOC_GEN_GO_VERSION: 1.3.2
   TRIGGER_REPO: ${{ github.event.client_payload.repo }}
+  TRIGGER_REPO_REF: ${{ github.event.client_payload.ref }}
   TRIGGER_REASON: ${{ github.event.client_payload.sha }}
 jobs:
   run:
@@ -33,8 +34,8 @@ jobs:
       - name: Check out proto files
         uses: actions/checkout@v1
         with:
-          repository: QuorumEngineering/quorum-plugin-definitions
-          ref: refs/heads/master
+          repository: ${{ env.TRIGGER_REPO }}
+          ref: ${{ env.TRIGGER_REPO_REF }}
           token: ${{ secrets.QUORUMBOT_PAT }}
           path: ${{ env.GRPC_DEFS_DIR_NAME }}
 #       Currently actions/cache doesn't support respository_dispatch event: https://github.com/actions/cache/issues/63
@@ -67,7 +68,7 @@ jobs:
         run: |
           git config --local user.name "quorumbot"
           git config --local user.email "46820074+quorumbot@users.noreply.github.com"
-          git commit -am "SDK Update from $TRIGGER_REPO@$TRIGGER_REASON" || echo
+          git commit -am "SDK Update from $TRIGGER_REPO/$TRIGGER_REPO_REF@$TRIGGER_REASON" || echo
       - name: Push changes if any
         uses: ad-m/github-push-action@master
         with:
