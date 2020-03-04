@@ -56,11 +56,12 @@ jobs:
           go get golang.org/x/tools/cmd/goimports
       - name: Generate stubs and mocks
         run: |
-          mkdir -p proto && mkdir -p mock_proto
+          mkdir -p proto && mkdir -p mock_proto && mkdir -p proto_common
           echo "protoc version: $(protoc --version)"
-          protoc -I ${{ env.GRPC_DEFS_DIR }} -I ${{ env.GRPC_DEFS_DIR }}/vendor --go_out=plugins=grpc:proto ${{ env.GRPC_DEFS_DIR }}/init.proto ${{ env.GRPC_DEFS_DIR }}/security.proto
-          mockgen -package mock_proto -destination mock_proto/mock_initializer.go -source proto/init.pb.go
-          mockgen -package mock_proto -destination mock_proto/mock_security.go    -source proto/security.pb.go
+          protoc -I ${{ env.GRPC_DEFS_DIR }} -I ${{ env.GRPC_DEFS_DIR }}/vendor --go_out=plugins=grpc:proto_common ${{ env.GRPC_DEFS_DIR }}/init.proto
+          protoc -I ${{ env.GRPC_DEFS_DIR }} -I ${{ env.GRPC_DEFS_DIR }}/vendor --go_out=plugins=grpc:proto ${{ env.GRPC_DEFS_DIR }}/security.proto
+          mockgen -package proto_common -destination proto_common/mock_initializer.go -source proto_common/init.pb.go
+          mockgen -package mock_proto   -destination mock_proto/mock_security.go      -source proto/security.pb.go
           goimports -w ./
           git add -A
           git status
