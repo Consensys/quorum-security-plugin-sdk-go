@@ -137,7 +137,7 @@ type TLSConfiguration_Data struct {
 	KeyPem []byte `protobuf:"bytes,1,opt,name=keyPem,proto3" json:"keyPem,omitempty"`
 	// Certificate in PEM format
 	CertPem []byte `protobuf:"bytes,2,opt,name=certPem,proto3" json:"certPem,omitempty"`
-	// List of cipher suites constants
+	// List of cipher suites constants being supported by the server
 	CipherSuites         []uint32 `protobuf:"varint,3,rep,packed,name=cipherSuites,proto3" json:"cipherSuites,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -190,6 +190,10 @@ func (m *TLSConfiguration_Data) GetCipherSuites() []uint32 {
 	return nil
 }
 
+//
+// Representing a permission being extracted from access token by the plugin implementation.
+// This permission is then stored in security context of a request and
+// used internally to decide if the access is granted/denied
 type GrantedAuthority struct {
 	// `geth` RPC API namespace. E.g.: rpc, eth, admin, debug, ...
 	Service string `protobuf:"bytes,1,opt,name=service,proto3" json:"service,omitempty"`
@@ -249,8 +253,48 @@ func (m *GrantedAuthority) GetRaw() string {
 }
 
 //
-// Preauthenticated token to carry raw token
-// and also the granted authorities for the token as the RPC response
+// Representing the access token for an authentication request
+type AuthenticationToken struct {
+	RawToken             []byte   `protobuf:"bytes,1,opt,name=rawToken,proto3" json:"rawToken,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *AuthenticationToken) Reset()         { *m = AuthenticationToken{} }
+func (m *AuthenticationToken) String() string { return proto.CompactTextString(m) }
+func (*AuthenticationToken) ProtoMessage()    {}
+func (*AuthenticationToken) Descriptor() ([]byte, []int) {
+	return fileDescriptor_55a487c716a8b59c, []int{2}
+}
+
+func (m *AuthenticationToken) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_AuthenticationToken.Unmarshal(m, b)
+}
+func (m *AuthenticationToken) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_AuthenticationToken.Marshal(b, m, deterministic)
+}
+func (m *AuthenticationToken) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_AuthenticationToken.Merge(m, src)
+}
+func (m *AuthenticationToken) XXX_Size() int {
+	return xxx_messageInfo_AuthenticationToken.Size(m)
+}
+func (m *AuthenticationToken) XXX_DiscardUnknown() {
+	xxx_messageInfo_AuthenticationToken.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_AuthenticationToken proto.InternalMessageInfo
+
+func (m *AuthenticationToken) GetRawToken() []byte {
+	if m != nil {
+		return m.RawToken
+	}
+	return nil
+}
+
+//
+// Representing an authenticated principal after `AuthenticationToken` has been processed
 type PreAuthenticatedAuthenticationToken struct {
 	RawToken             []byte               `protobuf:"bytes,1,opt,name=rawToken,proto3" json:"rawToken,omitempty"`
 	ExpiredAt            *timestamp.Timestamp `protobuf:"bytes,2,opt,name=expiredAt,proto3" json:"expiredAt,omitempty"`
@@ -264,7 +308,7 @@ func (m *PreAuthenticatedAuthenticationToken) Reset()         { *m = PreAuthenti
 func (m *PreAuthenticatedAuthenticationToken) String() string { return proto.CompactTextString(m) }
 func (*PreAuthenticatedAuthenticationToken) ProtoMessage()    {}
 func (*PreAuthenticatedAuthenticationToken) Descriptor() ([]byte, []int) {
-	return fileDescriptor_55a487c716a8b59c, []int{2}
+	return fileDescriptor_55a487c716a8b59c, []int{3}
 }
 
 func (m *PreAuthenticatedAuthenticationToken) XXX_Unmarshal(b []byte) error {
@@ -306,518 +350,49 @@ func (m *PreAuthenticatedAuthenticationToken) GetAuthorities() []*GrantedAuthori
 	return nil
 }
 
-//
-// A configuration attribute for a secure Account State
-type AccountStateSecurityAttribute struct {
-	FromAddress          string   `protobuf:"bytes,1,opt,name=fromAddress,proto3" json:"fromAddress,omitempty"`
-	ToAddress            string   `protobuf:"bytes,2,opt,name=toAddress,proto3" json:"toAddress,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
-}
-
-func (m *AccountStateSecurityAttribute) Reset()         { *m = AccountStateSecurityAttribute{} }
-func (m *AccountStateSecurityAttribute) String() string { return proto.CompactTextString(m) }
-func (*AccountStateSecurityAttribute) ProtoMessage()    {}
-func (*AccountStateSecurityAttribute) Descriptor() ([]byte, []int) {
-	return fileDescriptor_55a487c716a8b59c, []int{3}
-}
-
-func (m *AccountStateSecurityAttribute) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_AccountStateSecurityAttribute.Unmarshal(m, b)
-}
-func (m *AccountStateSecurityAttribute) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_AccountStateSecurityAttribute.Marshal(b, m, deterministic)
-}
-func (m *AccountStateSecurityAttribute) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_AccountStateSecurityAttribute.Merge(m, src)
-}
-func (m *AccountStateSecurityAttribute) XXX_Size() int {
-	return xxx_messageInfo_AccountStateSecurityAttribute.Size(m)
-}
-func (m *AccountStateSecurityAttribute) XXX_DiscardUnknown() {
-	xxx_messageInfo_AccountStateSecurityAttribute.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_AccountStateSecurityAttribute proto.InternalMessageInfo
-
-func (m *AccountStateSecurityAttribute) GetFromAddress() string {
-	if m != nil {
-		return m.FromAddress
-	}
-	return ""
-}
-
-func (m *AccountStateSecurityAttribute) GetToAddress() string {
-	if m != nil {
-		return m.ToAddress
-	}
-	return ""
-}
-
-//
-// An object contains multiple configuration attributes for a secure Account State
-type AccountStateSecurityAttributes struct {
-	Attributes           []*AccountStateSecurityAttribute `protobuf:"bytes,1,rep,name=attributes,proto3" json:"attributes,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}                         `json:"-"`
-	XXX_unrecognized     []byte                           `json:"-"`
-	XXX_sizecache        int32                            `json:"-"`
-}
-
-func (m *AccountStateSecurityAttributes) Reset()         { *m = AccountStateSecurityAttributes{} }
-func (m *AccountStateSecurityAttributes) String() string { return proto.CompactTextString(m) }
-func (*AccountStateSecurityAttributes) ProtoMessage()    {}
-func (*AccountStateSecurityAttributes) Descriptor() ([]byte, []int) {
-	return fileDescriptor_55a487c716a8b59c, []int{4}
-}
-
-func (m *AccountStateSecurityAttributes) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_AccountStateSecurityAttributes.Unmarshal(m, b)
-}
-func (m *AccountStateSecurityAttributes) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_AccountStateSecurityAttributes.Marshal(b, m, deterministic)
-}
-func (m *AccountStateSecurityAttributes) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_AccountStateSecurityAttributes.Merge(m, src)
-}
-func (m *AccountStateSecurityAttributes) XXX_Size() int {
-	return xxx_messageInfo_AccountStateSecurityAttributes.Size(m)
-}
-func (m *AccountStateSecurityAttributes) XXX_DiscardUnknown() {
-	xxx_messageInfo_AccountStateSecurityAttributes.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_AccountStateSecurityAttributes proto.InternalMessageInfo
-
-func (m *AccountStateSecurityAttributes) GetAttributes() []*AccountStateSecurityAttribute {
-	if m != nil {
-		return m.Attributes
-	}
-	return nil
-}
-
-//
-// A configuration attribute for a secure Contract
-type ContractSecurityAttribute struct {
-	// action owner account address in lower-case hex, prefixed with 0x
-	FromAddress string `protobuf:"bytes,1,opt,name=fromAddress,proto3" json:"fromAddress,omitempty"`
-	// contract owner account address in lower-case hex, prefixed with 0x
-	OwnerAddress string `protobuf:"bytes,2,opt,name=ownerAddress,proto3" json:"ownerAddress,omitempty"`
-	// public/private
-	Visibility string `protobuf:"bytes,3,opt,name=visibility,proto3" json:"visibility,omitempty"`
-	// create/read/write
-	Action string `protobuf:"bytes,4,opt,name=action,proto3" json:"action,omitempty"`
-	// Transaction Manager public key in standard base64 encoding, only required if visibility is private
-	PrivateFrom string `protobuf:"bytes,5,opt,name=privateFrom,proto3" json:"privateFrom,omitempty"`
-	// List of Transaction Manager public keys in standard base64 encoding, only required if visibility is private
-	Parties              []string `protobuf:"bytes,6,rep,name=parties,proto3" json:"parties,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
-}
-
-func (m *ContractSecurityAttribute) Reset()         { *m = ContractSecurityAttribute{} }
-func (m *ContractSecurityAttribute) String() string { return proto.CompactTextString(m) }
-func (*ContractSecurityAttribute) ProtoMessage()    {}
-func (*ContractSecurityAttribute) Descriptor() ([]byte, []int) {
-	return fileDescriptor_55a487c716a8b59c, []int{5}
-}
-
-func (m *ContractSecurityAttribute) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_ContractSecurityAttribute.Unmarshal(m, b)
-}
-func (m *ContractSecurityAttribute) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_ContractSecurityAttribute.Marshal(b, m, deterministic)
-}
-func (m *ContractSecurityAttribute) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ContractSecurityAttribute.Merge(m, src)
-}
-func (m *ContractSecurityAttribute) XXX_Size() int {
-	return xxx_messageInfo_ContractSecurityAttribute.Size(m)
-}
-func (m *ContractSecurityAttribute) XXX_DiscardUnknown() {
-	xxx_messageInfo_ContractSecurityAttribute.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_ContractSecurityAttribute proto.InternalMessageInfo
-
-func (m *ContractSecurityAttribute) GetFromAddress() string {
-	if m != nil {
-		return m.FromAddress
-	}
-	return ""
-}
-
-func (m *ContractSecurityAttribute) GetOwnerAddress() string {
-	if m != nil {
-		return m.OwnerAddress
-	}
-	return ""
-}
-
-func (m *ContractSecurityAttribute) GetVisibility() string {
-	if m != nil {
-		return m.Visibility
-	}
-	return ""
-}
-
-func (m *ContractSecurityAttribute) GetAction() string {
-	if m != nil {
-		return m.Action
-	}
-	return ""
-}
-
-func (m *ContractSecurityAttribute) GetPrivateFrom() string {
-	if m != nil {
-		return m.PrivateFrom
-	}
-	return ""
-}
-
-func (m *ContractSecurityAttribute) GetParties() []string {
-	if m != nil {
-		return m.Parties
-	}
-	return nil
-}
-
-//
-// An object contains multiple configuration attributes for a secure Contract
-type ContractSecurityAttributes struct {
-	Attributes           []*ContractSecurityAttribute `protobuf:"bytes,1,rep,name=attributes,proto3" json:"attributes,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}                     `json:"-"`
-	XXX_unrecognized     []byte                       `json:"-"`
-	XXX_sizecache        int32                        `json:"-"`
-}
-
-func (m *ContractSecurityAttributes) Reset()         { *m = ContractSecurityAttributes{} }
-func (m *ContractSecurityAttributes) String() string { return proto.CompactTextString(m) }
-func (*ContractSecurityAttributes) ProtoMessage()    {}
-func (*ContractSecurityAttributes) Descriptor() ([]byte, []int) {
-	return fileDescriptor_55a487c716a8b59c, []int{6}
-}
-
-func (m *ContractSecurityAttributes) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_ContractSecurityAttributes.Unmarshal(m, b)
-}
-func (m *ContractSecurityAttributes) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_ContractSecurityAttributes.Marshal(b, m, deterministic)
-}
-func (m *ContractSecurityAttributes) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ContractSecurityAttributes.Merge(m, src)
-}
-func (m *ContractSecurityAttributes) XXX_Size() int {
-	return xxx_messageInfo_ContractSecurityAttributes.Size(m)
-}
-func (m *ContractSecurityAttributes) XXX_DiscardUnknown() {
-	xxx_messageInfo_ContractSecurityAttributes.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_ContractSecurityAttributes proto.InternalMessageInfo
-
-func (m *ContractSecurityAttributes) GetAttributes() []*ContractSecurityAttribute {
-	if m != nil {
-		return m.Attributes
-	}
-	return nil
-}
-
-//*
-// A wrapper message to logically group other messages
-type AccountAccess struct {
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
-}
-
-func (m *AccountAccess) Reset()         { *m = AccountAccess{} }
-func (m *AccountAccess) String() string { return proto.CompactTextString(m) }
-func (*AccountAccess) ProtoMessage()    {}
-func (*AccountAccess) Descriptor() ([]byte, []int) {
-	return fileDescriptor_55a487c716a8b59c, []int{7}
-}
-
-func (m *AccountAccess) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_AccountAccess.Unmarshal(m, b)
-}
-func (m *AccountAccess) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_AccountAccess.Marshal(b, m, deterministic)
-}
-func (m *AccountAccess) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_AccountAccess.Merge(m, src)
-}
-func (m *AccountAccess) XXX_Size() int {
-	return xxx_messageInfo_AccountAccess.Size(m)
-}
-func (m *AccountAccess) XXX_DiscardUnknown() {
-	xxx_messageInfo_AccountAccess.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_AccountAccess proto.InternalMessageInfo
-
-type AccountAccess_Request struct {
-	// Token contains granted authorities
-	Token *PreAuthenticatedAuthenticationToken `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"`
-	// Configuration attributes used to interpret the required authorities
-	SecurityAttributes   *AccountStateSecurityAttributes `protobuf:"bytes,2,opt,name=securityAttributes,proto3" json:"securityAttributes,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}                        `json:"-"`
-	XXX_unrecognized     []byte                          `json:"-"`
-	XXX_sizecache        int32                           `json:"-"`
-}
-
-func (m *AccountAccess_Request) Reset()         { *m = AccountAccess_Request{} }
-func (m *AccountAccess_Request) String() string { return proto.CompactTextString(m) }
-func (*AccountAccess_Request) ProtoMessage()    {}
-func (*AccountAccess_Request) Descriptor() ([]byte, []int) {
-	return fileDescriptor_55a487c716a8b59c, []int{7, 0}
-}
-
-func (m *AccountAccess_Request) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_AccountAccess_Request.Unmarshal(m, b)
-}
-func (m *AccountAccess_Request) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_AccountAccess_Request.Marshal(b, m, deterministic)
-}
-func (m *AccountAccess_Request) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_AccountAccess_Request.Merge(m, src)
-}
-func (m *AccountAccess_Request) XXX_Size() int {
-	return xxx_messageInfo_AccountAccess_Request.Size(m)
-}
-func (m *AccountAccess_Request) XXX_DiscardUnknown() {
-	xxx_messageInfo_AccountAccess_Request.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_AccountAccess_Request proto.InternalMessageInfo
-
-func (m *AccountAccess_Request) GetToken() *PreAuthenticatedAuthenticationToken {
-	if m != nil {
-		return m.Token
-	}
-	return nil
-}
-
-func (m *AccountAccess_Request) GetSecurityAttributes() *AccountStateSecurityAttributes {
-	if m != nil {
-		return m.SecurityAttributes
-	}
-	return nil
-}
-
-type AccountAccess_Response struct {
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
-}
-
-func (m *AccountAccess_Response) Reset()         { *m = AccountAccess_Response{} }
-func (m *AccountAccess_Response) String() string { return proto.CompactTextString(m) }
-func (*AccountAccess_Response) ProtoMessage()    {}
-func (*AccountAccess_Response) Descriptor() ([]byte, []int) {
-	return fileDescriptor_55a487c716a8b59c, []int{7, 1}
-}
-
-func (m *AccountAccess_Response) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_AccountAccess_Response.Unmarshal(m, b)
-}
-func (m *AccountAccess_Response) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_AccountAccess_Response.Marshal(b, m, deterministic)
-}
-func (m *AccountAccess_Response) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_AccountAccess_Response.Merge(m, src)
-}
-func (m *AccountAccess_Response) XXX_Size() int {
-	return xxx_messageInfo_AccountAccess_Response.Size(m)
-}
-func (m *AccountAccess_Response) XXX_DiscardUnknown() {
-	xxx_messageInfo_AccountAccess_Response.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_AccountAccess_Response proto.InternalMessageInfo
-
-type ContractAccess struct {
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
-}
-
-func (m *ContractAccess) Reset()         { *m = ContractAccess{} }
-func (m *ContractAccess) String() string { return proto.CompactTextString(m) }
-func (*ContractAccess) ProtoMessage()    {}
-func (*ContractAccess) Descriptor() ([]byte, []int) {
-	return fileDescriptor_55a487c716a8b59c, []int{8}
-}
-
-func (m *ContractAccess) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_ContractAccess.Unmarshal(m, b)
-}
-func (m *ContractAccess) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_ContractAccess.Marshal(b, m, deterministic)
-}
-func (m *ContractAccess) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ContractAccess.Merge(m, src)
-}
-func (m *ContractAccess) XXX_Size() int {
-	return xxx_messageInfo_ContractAccess.Size(m)
-}
-func (m *ContractAccess) XXX_DiscardUnknown() {
-	xxx_messageInfo_ContractAccess.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_ContractAccess proto.InternalMessageInfo
-
-type ContractAccess_Request struct {
-	// Token contains granted authorities
-	Token *PreAuthenticatedAuthenticationToken `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"`
-	// Configuration attributes used to interpret the required authorities
-	SecurityAttributes   *ContractSecurityAttributes `protobuf:"bytes,2,opt,name=securityAttributes,proto3" json:"securityAttributes,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}                    `json:"-"`
-	XXX_unrecognized     []byte                      `json:"-"`
-	XXX_sizecache        int32                       `json:"-"`
-}
-
-func (m *ContractAccess_Request) Reset()         { *m = ContractAccess_Request{} }
-func (m *ContractAccess_Request) String() string { return proto.CompactTextString(m) }
-func (*ContractAccess_Request) ProtoMessage()    {}
-func (*ContractAccess_Request) Descriptor() ([]byte, []int) {
-	return fileDescriptor_55a487c716a8b59c, []int{8, 0}
-}
-
-func (m *ContractAccess_Request) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_ContractAccess_Request.Unmarshal(m, b)
-}
-func (m *ContractAccess_Request) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_ContractAccess_Request.Marshal(b, m, deterministic)
-}
-func (m *ContractAccess_Request) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ContractAccess_Request.Merge(m, src)
-}
-func (m *ContractAccess_Request) XXX_Size() int {
-	return xxx_messageInfo_ContractAccess_Request.Size(m)
-}
-func (m *ContractAccess_Request) XXX_DiscardUnknown() {
-	xxx_messageInfo_ContractAccess_Request.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_ContractAccess_Request proto.InternalMessageInfo
-
-func (m *ContractAccess_Request) GetToken() *PreAuthenticatedAuthenticationToken {
-	if m != nil {
-		return m.Token
-	}
-	return nil
-}
-
-func (m *ContractAccess_Request) GetSecurityAttributes() *ContractSecurityAttributes {
-	if m != nil {
-		return m.SecurityAttributes
-	}
-	return nil
-}
-
-type ContractAccess_Response struct {
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
-}
-
-func (m *ContractAccess_Response) Reset()         { *m = ContractAccess_Response{} }
-func (m *ContractAccess_Response) String() string { return proto.CompactTextString(m) }
-func (*ContractAccess_Response) ProtoMessage()    {}
-func (*ContractAccess_Response) Descriptor() ([]byte, []int) {
-	return fileDescriptor_55a487c716a8b59c, []int{8, 1}
-}
-
-func (m *ContractAccess_Response) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_ContractAccess_Response.Unmarshal(m, b)
-}
-func (m *ContractAccess_Response) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_ContractAccess_Response.Marshal(b, m, deterministic)
-}
-func (m *ContractAccess_Response) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ContractAccess_Response.Merge(m, src)
-}
-func (m *ContractAccess_Response) XXX_Size() int {
-	return xxx_messageInfo_ContractAccess_Response.Size(m)
-}
-func (m *ContractAccess_Response) XXX_DiscardUnknown() {
-	xxx_messageInfo_ContractAccess_Response.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_ContractAccess_Response proto.InternalMessageInfo
-
 func init() {
 	proto.RegisterType((*TLSConfiguration)(nil), "proto.TLSConfiguration")
 	proto.RegisterType((*TLSConfiguration_Request)(nil), "proto.TLSConfiguration.Request")
 	proto.RegisterType((*TLSConfiguration_Response)(nil), "proto.TLSConfiguration.Response")
 	proto.RegisterType((*TLSConfiguration_Data)(nil), "proto.TLSConfiguration.Data")
 	proto.RegisterType((*GrantedAuthority)(nil), "proto.GrantedAuthority")
+	proto.RegisterType((*AuthenticationToken)(nil), "proto.AuthenticationToken")
 	proto.RegisterType((*PreAuthenticatedAuthenticationToken)(nil), "proto.PreAuthenticatedAuthenticationToken")
-	proto.RegisterType((*AccountStateSecurityAttribute)(nil), "proto.AccountStateSecurityAttribute")
-	proto.RegisterType((*AccountStateSecurityAttributes)(nil), "proto.AccountStateSecurityAttributes")
-	proto.RegisterType((*ContractSecurityAttribute)(nil), "proto.ContractSecurityAttribute")
-	proto.RegisterType((*ContractSecurityAttributes)(nil), "proto.ContractSecurityAttributes")
-	proto.RegisterType((*AccountAccess)(nil), "proto.AccountAccess")
-	proto.RegisterType((*AccountAccess_Request)(nil), "proto.AccountAccess.Request")
-	proto.RegisterType((*AccountAccess_Response)(nil), "proto.AccountAccess.Response")
-	proto.RegisterType((*ContractAccess)(nil), "proto.ContractAccess")
-	proto.RegisterType((*ContractAccess_Request)(nil), "proto.ContractAccess.Request")
-	proto.RegisterType((*ContractAccess_Response)(nil), "proto.ContractAccess.Response")
 }
 
 func init() { proto.RegisterFile("security.proto", fileDescriptor_55a487c716a8b59c) }
 
 var fileDescriptor_55a487c716a8b59c = []byte{
-	// 750 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xac, 0x55, 0xcd, 0x6e, 0xdb, 0x46,
-	0x10, 0x06, 0x2b, 0xff, 0x69, 0x24, 0x1b, 0xc6, 0x02, 0xb5, 0x55, 0x42, 0x72, 0x55, 0xb6, 0x05,
-	0x0c, 0x1f, 0xa8, 0x42, 0xbd, 0xb4, 0x68, 0x0f, 0x96, 0x6d, 0xc4, 0x39, 0x24, 0x80, 0x43, 0xd9,
-	0x41, 0x10, 0x04, 0x09, 0x56, 0xab, 0x11, 0xb5, 0xb0, 0xc8, 0xa5, 0x77, 0x97, 0x76, 0x94, 0x4b,
-	0xde, 0x24, 0x87, 0x3c, 0x44, 0x80, 0x1c, 0x02, 0xe4, 0x25, 0xf2, 0x3e, 0x01, 0xc9, 0xa5, 0x24,
-	0x2a, 0x96, 0x7f, 0x82, 0x9c, 0xb8, 0x33, 0x3b, 0x33, 0xdf, 0x7c, 0x33, 0x9f, 0x56, 0xb0, 0xa1,
-	0x90, 0xc5, 0x92, 0xeb, 0xb1, 0x1b, 0x49, 0xa1, 0x05, 0x59, 0x4e, 0x3f, 0xf6, 0x7f, 0x3e, 0xd7,
-	0xc3, 0xb8, 0xe7, 0x32, 0x11, 0xb4, 0x7c, 0x31, 0xa2, 0xa1, 0xdf, 0x4a, 0x2f, 0x7a, 0xf1, 0xa0,
-	0x15, 0xe9, 0x71, 0x84, 0xaa, 0xa5, 0x79, 0x80, 0x4a, 0xd3, 0x20, 0x9a, 0x9e, 0xb2, 0x1a, 0xce,
-	0x47, 0x0b, 0x36, 0x4f, 0x1f, 0x75, 0x0f, 0x45, 0x38, 0xe0, 0x7e, 0x2c, 0xa9, 0xe6, 0x22, 0xb4,
-	0xcb, 0xb0, 0xea, 0xe1, 0x45, 0x8c, 0x4a, 0xdb, 0xff, 0xc3, 0x9a, 0x87, 0x2a, 0x12, 0xa1, 0x42,
-	0xf2, 0x17, 0x2c, 0xf5, 0xa9, 0xa6, 0x35, 0xab, 0x69, 0xed, 0x56, 0xda, 0xf5, 0xac, 0x82, 0x3b,
-	0x9f, 0xed, 0x1e, 0x51, 0x4d, 0xbd, 0x34, 0xd2, 0x7e, 0x01, 0x4b, 0x89, 0x45, 0xb6, 0x60, 0xe5,
-	0x1c, 0xc7, 0x27, 0x18, 0xa4, 0xb9, 0x55, 0xcf, 0x58, 0xa4, 0x06, 0xab, 0x0c, 0xa5, 0x4e, 0x2e,
-	0x7e, 0x4a, 0x2f, 0x72, 0x93, 0x38, 0x50, 0x65, 0x3c, 0x1a, 0xa2, 0xec, 0xc6, 0x5c, 0xa3, 0xaa,
-	0x95, 0x9a, 0xa5, 0xdd, 0x75, 0xaf, 0xe0, 0x73, 0x9e, 0xc2, 0xe6, 0xb1, 0xa4, 0xa1, 0xc6, 0x7e,
-	0x27, 0xd6, 0x43, 0x91, 0x4c, 0x26, 0xa9, 0xa8, 0x50, 0x5e, 0x72, 0x86, 0x29, 0x54, 0xd9, 0xcb,
-	0xcd, 0xa4, 0x87, 0x00, 0xf5, 0x50, 0xf4, 0x53, 0xa8, 0xb2, 0x67, 0x2c, 0xb2, 0x09, 0x25, 0x49,
-	0xaf, 0x6a, 0xa5, 0xd4, 0x99, 0x1c, 0x9d, 0x0f, 0x16, 0xfc, 0x7e, 0x22, 0x31, 0x29, 0x8a, 0xa1,
-	0xe6, 0x8c, 0x1a, 0x04, 0x63, 0x70, 0x11, 0x9e, 0x8a, 0x73, 0x0c, 0x89, 0x0d, 0x6b, 0x92, 0x5e,
-	0xa5, 0x67, 0xc3, 0x6b, 0x62, 0x93, 0x7f, 0xa0, 0x8c, 0xaf, 0x23, 0x2e, 0xb1, 0xdf, 0xd1, 0x29,
-	0x60, 0xa5, 0x6d, 0xbb, 0xbe, 0x10, 0xfe, 0x08, 0xdd, 0x7c, 0x3b, 0xee, 0x69, 0xbe, 0x0c, 0x6f,
-	0x1a, 0x4c, 0xfe, 0x85, 0x0a, 0x35, 0x74, 0xb8, 0x21, 0x5e, 0x69, 0x6f, 0x9b, 0x61, 0xcf, 0xf3,
-	0xf5, 0x66, 0x63, 0x9d, 0x57, 0xd0, 0xe8, 0x30, 0x26, 0xe2, 0x50, 0x77, 0x35, 0xd5, 0xd8, 0x35,
-	0x72, 0xe9, 0x68, 0x2d, 0x79, 0x2f, 0xd6, 0x48, 0x9a, 0x50, 0x19, 0x48, 0x11, 0x74, 0xfa, 0x7d,
-	0x89, 0x4a, 0x99, 0x09, 0xcd, 0xba, 0x48, 0x1d, 0xca, 0x5a, 0xe4, 0xf7, 0xd9, 0xa0, 0xa6, 0x0e,
-	0x67, 0x00, 0x3b, 0x37, 0x02, 0x28, 0x72, 0x04, 0x40, 0x27, 0x56, 0xcd, 0x4a, 0x9b, 0xff, 0xc3,
-	0x34, 0x7f, 0x63, 0xaa, 0x37, 0x93, 0xe7, 0x7c, 0xb1, 0xe0, 0x97, 0x43, 0x11, 0x6a, 0x49, 0x99,
-	0xfe, 0x1e, 0x16, 0x0e, 0x54, 0xc5, 0x55, 0x88, 0xb2, 0x48, 0xa4, 0xe0, 0x23, 0x3b, 0x00, 0x97,
-	0x5c, 0xf1, 0x1e, 0x1f, 0x71, 0x3d, 0x36, 0xeb, 0x9f, 0xf1, 0x24, 0x7a, 0xa1, 0x2c, 0x59, 0x76,
-	0x6d, 0x29, 0xd3, 0x4b, 0x66, 0x25, 0xe8, 0x91, 0xe4, 0x97, 0x54, 0xe3, 0x03, 0x29, 0x82, 0xda,
-	0x72, 0x86, 0x3e, 0xe3, 0x4a, 0x34, 0x18, 0x51, 0x99, 0x6e, 0x6f, 0xa5, 0x59, 0x4a, 0x34, 0x68,
-	0x4c, 0xe7, 0x25, 0xd8, 0x0b, 0x69, 0x29, 0xb2, 0x7f, 0xcd, 0xec, 0x9a, 0x66, 0x76, 0x0b, 0xd3,
-	0x0a, 0x73, 0xfb, 0x6c, 0xc1, 0xba, 0x99, 0x72, 0x87, 0x31, 0x54, 0xca, 0x7e, 0x6f, 0x4d, 0x7e,
-	0xcb, 0x64, 0x1f, 0x96, 0xf5, 0x44, 0xac, 0x95, 0xf6, 0x9e, 0x29, 0x7d, 0x07, 0xa9, 0x7b, 0x59,
-	0x22, 0x39, 0x03, 0xa2, 0xbe, 0xe9, 0xdb, 0xc8, 0xfb, 0xcf, 0xbb, 0x6c, 0x59, 0x79, 0xd7, 0x14,
-	0xb0, 0x61, 0xfa, 0xc8, 0x38, 0x9f, 0x2c, 0xd8, 0xc8, 0xc9, 0x1a, 0x0e, 0xef, 0x7e, 0x28, 0x87,
-	0x27, 0x37, 0x70, 0xf8, 0xed, 0xb6, 0x69, 0xdf, 0xda, 0x7f, 0xbb, 0x07, 0x5b, 0xf3, 0x2f, 0x62,
-	0x57, 0xc4, 0x92, 0x21, 0x79, 0x08, 0xa5, 0x63, 0xd4, 0xe4, 0xd7, 0x45, 0xef, 0x66, 0xfe, 0xe4,
-	0x36, 0x17, 0x07, 0x18, 0x8c, 0xb7, 0xf0, 0x73, 0x91, 0xe0, 0x63, 0x1a, 0x52, 0x1f, 0x25, 0x19,
-	0x40, 0x75, 0x76, 0x0c, 0xe4, 0x1e, 0xe3, 0xb1, 0xef, 0x11, 0xdb, 0x8e, 0xa1, 0x5e, 0x90, 0xd9,
-	0x11, 0x32, 0xae, 0x66, 0xfa, 0x38, 0x83, 0x2d, 0xf3, 0x44, 0xbd, 0xc1, 0x42, 0x20, 0xa9, 0x17,
-	0x55, 0x92, 0x79, 0x27, 0xd4, 0x1b, 0x0b, 0x6e, 0x0d, 0xef, 0x31, 0x34, 0x8a, 0xd2, 0x98, 0xc7,
-	0x7d, 0x06, 0xdb, 0x13, 0xdc, 0x62, 0x24, 0x69, 0xcc, 0xad, 0x76, 0x0e, 0x79, 0x67, 0xd1, 0x75,
-	0x06, 0x7d, 0xb0, 0x07, 0xdb, 0x4c, 0x04, 0xee, 0x45, 0x2c, 0x64, 0x1c, 0xb8, 0xd1, 0x28, 0xf6,
-	0x79, 0x98, 0xa5, 0x1c, 0xac, 0xe5, 0x2a, 0x79, 0x9e, 0xfd, 0x21, 0xf7, 0x56, 0xd2, 0xcf, 0xdf,
-	0x5f, 0x03, 0x00, 0x00, 0xff, 0xff, 0xd2, 0xf0, 0x6d, 0xe3, 0xb0, 0x07, 0x00, 0x00,
+	// 452 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x94, 0x53, 0xc1, 0x6e, 0x13, 0x31,
+	0x10, 0x55, 0xd8, 0xd2, 0x26, 0x93, 0x80, 0x22, 0x23, 0xda, 0x68, 0x85, 0x44, 0xb4, 0x5c, 0xaa,
+	0x1e, 0x1c, 0x58, 0x2e, 0x20, 0xb8, 0xb4, 0x20, 0x95, 0x03, 0x48, 0x95, 0x13, 0xf5, 0x80, 0xb8,
+	0x38, 0x9b, 0xe9, 0xc6, 0x6a, 0xd6, 0xde, 0x7a, 0xc7, 0x94, 0xfc, 0x18, 0x12, 0x7f, 0x87, 0xd6,
+	0xeb, 0xa5, 0x69, 0x44, 0x24, 0x38, 0x79, 0x9e, 0x67, 0xe6, 0x79, 0xfc, 0x9e, 0x0d, 0x8f, 0x2b,
+	0xcc, 0x9c, 0x55, 0xb4, 0xe6, 0xa5, 0x35, 0x64, 0xd8, 0x43, 0xbf, 0xc4, 0xef, 0x72, 0x45, 0x4b,
+	0x37, 0xe7, 0x99, 0x29, 0x26, 0xb9, 0x59, 0x49, 0x9d, 0x4f, 0x7c, 0x62, 0xee, 0xae, 0x26, 0x25,
+	0xad, 0x4b, 0xac, 0x26, 0xa4, 0x0a, 0xac, 0x48, 0x16, 0xe5, 0x5d, 0xd4, 0x70, 0x24, 0xbf, 0x3a,
+	0x30, 0x9c, 0x7d, 0x9e, 0x7e, 0x30, 0xfa, 0x4a, 0xe5, 0xce, 0x4a, 0x52, 0x46, 0xc7, 0x3d, 0x38,
+	0x10, 0x78, 0xe3, 0xb0, 0xa2, 0xf8, 0x3d, 0x74, 0x05, 0x56, 0xa5, 0xd1, 0x15, 0xb2, 0x97, 0xb0,
+	0xb7, 0x90, 0x24, 0x47, 0x9d, 0x71, 0xe7, 0xb8, 0x9f, 0x3e, 0x6b, 0x18, 0xf8, 0x76, 0x37, 0xff,
+	0x28, 0x49, 0x0a, 0x5f, 0x19, 0x7f, 0x83, 0xbd, 0x1a, 0xb1, 0x43, 0xd8, 0xbf, 0xc6, 0xf5, 0x05,
+	0x16, 0xbe, 0x77, 0x20, 0x02, 0x62, 0x23, 0x38, 0xc8, 0xd0, 0x52, 0x9d, 0x78, 0xe0, 0x13, 0x2d,
+	0x64, 0x09, 0x0c, 0x32, 0x55, 0x2e, 0xd1, 0x4e, 0x9d, 0x22, 0xac, 0x46, 0xd1, 0x38, 0x3a, 0x7e,
+	0x24, 0xee, 0xed, 0x25, 0x97, 0x30, 0x3c, 0xb7, 0x52, 0x13, 0x2e, 0x4e, 0x1d, 0x2d, 0x4d, 0xad,
+	0x4c, 0xcd, 0x58, 0xa1, 0xfd, 0xae, 0x32, 0xf4, 0x47, 0xf5, 0x44, 0x0b, 0xeb, 0x19, 0x0a, 0xa4,
+	0xa5, 0x59, 0xf8, 0xa3, 0x7a, 0x22, 0x20, 0x36, 0x84, 0xc8, 0xca, 0xdb, 0x51, 0xe4, 0x37, 0xeb,
+	0x30, 0x79, 0x05, 0x4f, 0x6a, 0x42, 0xd4, 0xa4, 0x32, 0x7f, 0xa5, 0x99, 0xb9, 0x46, 0xcd, 0x62,
+	0xe8, 0x5a, 0x79, 0xeb, 0xe3, 0x70, 0x8d, 0x3f, 0x38, 0xf9, 0xd9, 0x81, 0x17, 0x17, 0x16, 0x37,
+	0xda, 0x9a, 0xa1, 0xfe, 0x83, 0x83, 0xbd, 0x81, 0x1e, 0xfe, 0x28, 0x95, 0xc5, 0xc5, 0x29, 0xf9,
+	0x19, 0xfb, 0x69, 0xcc, 0x73, 0x63, 0xf2, 0x15, 0xf2, 0xd6, 0x50, 0x3e, 0x6b, 0xfd, 0x13, 0x77,
+	0xc5, 0xec, 0x2d, 0xf4, 0x65, 0x50, 0x40, 0x05, 0xad, 0xfa, 0xe9, 0x51, 0xf0, 0x67, 0x5b, 0x22,
+	0xb1, 0x59, 0x9b, 0xce, 0xe1, 0x70, 0xdb, 0xc0, 0xa9, 0x71, 0x36, 0x43, 0xf6, 0x09, 0xa2, 0x73,
+	0x24, 0xf6, 0x7c, 0x97, 0xcd, 0xed, 0x0b, 0x19, 0xef, 0x2e, 0x68, 0xde, 0x4d, 0x6a, 0xe0, 0xe9,
+	0x7d, 0x2d, 0xbe, 0x48, 0x2d, 0x73, 0xb4, 0xec, 0x12, 0x06, 0x9b, 0x8a, 0xb1, 0x38, 0x50, 0xfd,
+	0x45, 0xb9, 0xf8, 0x24, 0xe4, 0xfe, 0x41, 0xe5, 0xb3, 0x13, 0x38, 0xca, 0x4c, 0xc1, 0x6f, 0x9c,
+	0xb1, 0xae, 0xe0, 0xe5, 0xca, 0xe5, 0x4a, 0x37, 0xed, 0x67, 0xdd, 0x69, 0xf8, 0x43, 0x5f, 0x9b,
+	0xdf, 0x33, 0xdf, 0xf7, 0xcb, 0xeb, 0xdf, 0x01, 0x00, 0x00, 0xff, 0xff, 0xcc, 0x7f, 0xc4, 0xe9,
+	0x5d, 0x03, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -905,8 +480,8 @@ var _TLSConfigurationSource_serviceDesc = grpc.ServiceDesc{
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type AuthenticationManagerClient interface {
 	//
-	// Perform authentication of the token. Return a token that contains expiry date and granted authority
-	Authenticate(ctx context.Context, in *PreAuthenticatedAuthenticationToken, opts ...grpc.CallOption) (*PreAuthenticatedAuthenticationToken, error)
+	// Perform authentication of the token. Return a token that contains expiry date and granted authorities
+	Authenticate(ctx context.Context, in *AuthenticationToken, opts ...grpc.CallOption) (*PreAuthenticatedAuthenticationToken, error)
 }
 
 type authenticationManagerClient struct {
@@ -917,7 +492,7 @@ func NewAuthenticationManagerClient(cc *grpc.ClientConn) AuthenticationManagerCl
 	return &authenticationManagerClient{cc}
 }
 
-func (c *authenticationManagerClient) Authenticate(ctx context.Context, in *PreAuthenticatedAuthenticationToken, opts ...grpc.CallOption) (*PreAuthenticatedAuthenticationToken, error) {
+func (c *authenticationManagerClient) Authenticate(ctx context.Context, in *AuthenticationToken, opts ...grpc.CallOption) (*PreAuthenticatedAuthenticationToken, error) {
 	out := new(PreAuthenticatedAuthenticationToken)
 	err := c.cc.Invoke(ctx, "/proto.AuthenticationManager/Authenticate", in, out, opts...)
 	if err != nil {
@@ -929,15 +504,15 @@ func (c *authenticationManagerClient) Authenticate(ctx context.Context, in *PreA
 // AuthenticationManagerServer is the server API for AuthenticationManager service.
 type AuthenticationManagerServer interface {
 	//
-	// Perform authentication of the token. Return a token that contains expiry date and granted authority
-	Authenticate(context.Context, *PreAuthenticatedAuthenticationToken) (*PreAuthenticatedAuthenticationToken, error)
+	// Perform authentication of the token. Return a token that contains expiry date and granted authorities
+	Authenticate(context.Context, *AuthenticationToken) (*PreAuthenticatedAuthenticationToken, error)
 }
 
 // UnimplementedAuthenticationManagerServer can be embedded to have forward compatible implementations.
 type UnimplementedAuthenticationManagerServer struct {
 }
 
-func (*UnimplementedAuthenticationManagerServer) Authenticate(ctx context.Context, req *PreAuthenticatedAuthenticationToken) (*PreAuthenticatedAuthenticationToken, error) {
+func (*UnimplementedAuthenticationManagerServer) Authenticate(ctx context.Context, req *AuthenticationToken) (*PreAuthenticatedAuthenticationToken, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Authenticate not implemented")
 }
 
@@ -946,7 +521,7 @@ func RegisterAuthenticationManagerServer(s *grpc.Server, srv AuthenticationManag
 }
 
 func _AuthenticationManager_Authenticate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(PreAuthenticatedAuthenticationToken)
+	in := new(AuthenticationToken)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -958,7 +533,7 @@ func _AuthenticationManager_Authenticate_Handler(srv interface{}, ctx context.Co
 		FullMethod: "/proto.AuthenticationManager/Authenticate",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AuthenticationManagerServer).Authenticate(ctx, req.(*PreAuthenticatedAuthenticationToken))
+		return srv.(AuthenticationManagerServer).Authenticate(ctx, req.(*AuthenticationToken))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -970,150 +545,6 @@ var _AuthenticationManager_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Authenticate",
 			Handler:    _AuthenticationManager_Authenticate_Handler,
-		},
-	},
-	Streams:  []grpc.StreamDesc{},
-	Metadata: "security.proto",
-}
-
-// AccountAccessDecisionManagerClient is the client API for AccountAccessDecisionManager service.
-//
-// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
-type AccountAccessDecisionManagerClient interface {
-	AuthorizeAccountAccess(ctx context.Context, in *AccountAccess_Request, opts ...grpc.CallOption) (*AccountAccess_Response, error)
-}
-
-type accountAccessDecisionManagerClient struct {
-	cc *grpc.ClientConn
-}
-
-func NewAccountAccessDecisionManagerClient(cc *grpc.ClientConn) AccountAccessDecisionManagerClient {
-	return &accountAccessDecisionManagerClient{cc}
-}
-
-func (c *accountAccessDecisionManagerClient) AuthorizeAccountAccess(ctx context.Context, in *AccountAccess_Request, opts ...grpc.CallOption) (*AccountAccess_Response, error) {
-	out := new(AccountAccess_Response)
-	err := c.cc.Invoke(ctx, "/proto.AccountAccessDecisionManager/AuthorizeAccountAccess", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-// AccountAccessDecisionManagerServer is the server API for AccountAccessDecisionManager service.
-type AccountAccessDecisionManagerServer interface {
-	AuthorizeAccountAccess(context.Context, *AccountAccess_Request) (*AccountAccess_Response, error)
-}
-
-// UnimplementedAccountAccessDecisionManagerServer can be embedded to have forward compatible implementations.
-type UnimplementedAccountAccessDecisionManagerServer struct {
-}
-
-func (*UnimplementedAccountAccessDecisionManagerServer) AuthorizeAccountAccess(ctx context.Context, req *AccountAccess_Request) (*AccountAccess_Response, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method AuthorizeAccountAccess not implemented")
-}
-
-func RegisterAccountAccessDecisionManagerServer(s *grpc.Server, srv AccountAccessDecisionManagerServer) {
-	s.RegisterService(&_AccountAccessDecisionManager_serviceDesc, srv)
-}
-
-func _AccountAccessDecisionManager_AuthorizeAccountAccess_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(AccountAccess_Request)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(AccountAccessDecisionManagerServer).AuthorizeAccountAccess(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/proto.AccountAccessDecisionManager/AuthorizeAccountAccess",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AccountAccessDecisionManagerServer).AuthorizeAccountAccess(ctx, req.(*AccountAccess_Request))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-var _AccountAccessDecisionManager_serviceDesc = grpc.ServiceDesc{
-	ServiceName: "proto.AccountAccessDecisionManager",
-	HandlerType: (*AccountAccessDecisionManagerServer)(nil),
-	Methods: []grpc.MethodDesc{
-		{
-			MethodName: "AuthorizeAccountAccess",
-			Handler:    _AccountAccessDecisionManager_AuthorizeAccountAccess_Handler,
-		},
-	},
-	Streams:  []grpc.StreamDesc{},
-	Metadata: "security.proto",
-}
-
-// ContractAccessDecisionManagerClient is the client API for ContractAccessDecisionManager service.
-//
-// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
-type ContractAccessDecisionManagerClient interface {
-	AuthorizeContractAccess(ctx context.Context, in *ContractAccess_Request, opts ...grpc.CallOption) (*ContractAccess_Response, error)
-}
-
-type contractAccessDecisionManagerClient struct {
-	cc *grpc.ClientConn
-}
-
-func NewContractAccessDecisionManagerClient(cc *grpc.ClientConn) ContractAccessDecisionManagerClient {
-	return &contractAccessDecisionManagerClient{cc}
-}
-
-func (c *contractAccessDecisionManagerClient) AuthorizeContractAccess(ctx context.Context, in *ContractAccess_Request, opts ...grpc.CallOption) (*ContractAccess_Response, error) {
-	out := new(ContractAccess_Response)
-	err := c.cc.Invoke(ctx, "/proto.ContractAccessDecisionManager/AuthorizeContractAccess", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-// ContractAccessDecisionManagerServer is the server API for ContractAccessDecisionManager service.
-type ContractAccessDecisionManagerServer interface {
-	AuthorizeContractAccess(context.Context, *ContractAccess_Request) (*ContractAccess_Response, error)
-}
-
-// UnimplementedContractAccessDecisionManagerServer can be embedded to have forward compatible implementations.
-type UnimplementedContractAccessDecisionManagerServer struct {
-}
-
-func (*UnimplementedContractAccessDecisionManagerServer) AuthorizeContractAccess(ctx context.Context, req *ContractAccess_Request) (*ContractAccess_Response, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method AuthorizeContractAccess not implemented")
-}
-
-func RegisterContractAccessDecisionManagerServer(s *grpc.Server, srv ContractAccessDecisionManagerServer) {
-	s.RegisterService(&_ContractAccessDecisionManager_serviceDesc, srv)
-}
-
-func _ContractAccessDecisionManager_AuthorizeContractAccess_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ContractAccess_Request)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ContractAccessDecisionManagerServer).AuthorizeContractAccess(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/proto.ContractAccessDecisionManager/AuthorizeContractAccess",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ContractAccessDecisionManagerServer).AuthorizeContractAccess(ctx, req.(*ContractAccess_Request))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-var _ContractAccessDecisionManager_serviceDesc = grpc.ServiceDesc{
-	ServiceName: "proto.ContractAccessDecisionManager",
-	HandlerType: (*ContractAccessDecisionManagerServer)(nil),
-	Methods: []grpc.MethodDesc{
-		{
-			MethodName: "AuthorizeContractAccess",
-			Handler:    _ContractAccessDecisionManager_AuthorizeContractAccess_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

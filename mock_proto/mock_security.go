@@ -118,7 +118,7 @@ func (m *MockAuthenticationManagerClient) EXPECT() *MockAuthenticationManagerCli
 }
 
 // Authenticate mocks base method
-func (m *MockAuthenticationManagerClient) Authenticate(ctx context.Context, in *proto.PreAuthenticatedAuthenticationToken, opts ...grpc.CallOption) (*proto.PreAuthenticatedAuthenticationToken, error) {
+func (m *MockAuthenticationManagerClient) Authenticate(ctx context.Context, in *proto.AuthenticationToken, opts ...grpc.CallOption) (*proto.PreAuthenticatedAuthenticationToken, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx, in}
 	for _, a := range opts {
@@ -161,7 +161,7 @@ func (m *MockAuthenticationManagerServer) EXPECT() *MockAuthenticationManagerSer
 }
 
 // Authenticate mocks base method
-func (m *MockAuthenticationManagerServer) Authenticate(arg0 context.Context, arg1 *proto.PreAuthenticatedAuthenticationToken) (*proto.PreAuthenticatedAuthenticationToken, error) {
+func (m *MockAuthenticationManagerServer) Authenticate(arg0 context.Context, arg1 *proto.AuthenticationToken) (*proto.PreAuthenticatedAuthenticationToken, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Authenticate", arg0, arg1)
 	ret0, _ := ret[0].(*proto.PreAuthenticatedAuthenticationToken)
@@ -173,166 +173,4 @@ func (m *MockAuthenticationManagerServer) Authenticate(arg0 context.Context, arg
 func (mr *MockAuthenticationManagerServerMockRecorder) Authenticate(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Authenticate", reflect.TypeOf((*MockAuthenticationManagerServer)(nil).Authenticate), arg0, arg1)
-}
-
-// MockAccountAccessDecisionManagerClient is a mock of AccountAccessDecisionManagerClient interface
-type MockAccountAccessDecisionManagerClient struct {
-	ctrl     *gomock.Controller
-	recorder *MockAccountAccessDecisionManagerClientMockRecorder
-}
-
-// MockAccountAccessDecisionManagerClientMockRecorder is the mock recorder for MockAccountAccessDecisionManagerClient
-type MockAccountAccessDecisionManagerClientMockRecorder struct {
-	mock *MockAccountAccessDecisionManagerClient
-}
-
-// NewMockAccountAccessDecisionManagerClient creates a new mock instance
-func NewMockAccountAccessDecisionManagerClient(ctrl *gomock.Controller) *MockAccountAccessDecisionManagerClient {
-	mock := &MockAccountAccessDecisionManagerClient{ctrl: ctrl}
-	mock.recorder = &MockAccountAccessDecisionManagerClientMockRecorder{mock}
-	return mock
-}
-
-// EXPECT returns an object that allows the caller to indicate expected use
-func (m *MockAccountAccessDecisionManagerClient) EXPECT() *MockAccountAccessDecisionManagerClientMockRecorder {
-	return m.recorder
-}
-
-// AuthorizeAccountAccess mocks base method
-func (m *MockAccountAccessDecisionManagerClient) AuthorizeAccountAccess(ctx context.Context, in *proto.AccountAccess_Request, opts ...grpc.CallOption) (*proto.AccountAccess_Response, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, in}
-	for _, a := range opts {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "AuthorizeAccountAccess", varargs...)
-	ret0, _ := ret[0].(*proto.AccountAccess_Response)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// AuthorizeAccountAccess indicates an expected call of AuthorizeAccountAccess
-func (mr *MockAccountAccessDecisionManagerClientMockRecorder) AuthorizeAccountAccess(ctx, in interface{}, opts ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, in}, opts...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AuthorizeAccountAccess", reflect.TypeOf((*MockAccountAccessDecisionManagerClient)(nil).AuthorizeAccountAccess), varargs...)
-}
-
-// MockAccountAccessDecisionManagerServer is a mock of AccountAccessDecisionManagerServer interface
-type MockAccountAccessDecisionManagerServer struct {
-	ctrl     *gomock.Controller
-	recorder *MockAccountAccessDecisionManagerServerMockRecorder
-}
-
-// MockAccountAccessDecisionManagerServerMockRecorder is the mock recorder for MockAccountAccessDecisionManagerServer
-type MockAccountAccessDecisionManagerServerMockRecorder struct {
-	mock *MockAccountAccessDecisionManagerServer
-}
-
-// NewMockAccountAccessDecisionManagerServer creates a new mock instance
-func NewMockAccountAccessDecisionManagerServer(ctrl *gomock.Controller) *MockAccountAccessDecisionManagerServer {
-	mock := &MockAccountAccessDecisionManagerServer{ctrl: ctrl}
-	mock.recorder = &MockAccountAccessDecisionManagerServerMockRecorder{mock}
-	return mock
-}
-
-// EXPECT returns an object that allows the caller to indicate expected use
-func (m *MockAccountAccessDecisionManagerServer) EXPECT() *MockAccountAccessDecisionManagerServerMockRecorder {
-	return m.recorder
-}
-
-// AuthorizeAccountAccess mocks base method
-func (m *MockAccountAccessDecisionManagerServer) AuthorizeAccountAccess(arg0 context.Context, arg1 *proto.AccountAccess_Request) (*proto.AccountAccess_Response, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "AuthorizeAccountAccess", arg0, arg1)
-	ret0, _ := ret[0].(*proto.AccountAccess_Response)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// AuthorizeAccountAccess indicates an expected call of AuthorizeAccountAccess
-func (mr *MockAccountAccessDecisionManagerServerMockRecorder) AuthorizeAccountAccess(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AuthorizeAccountAccess", reflect.TypeOf((*MockAccountAccessDecisionManagerServer)(nil).AuthorizeAccountAccess), arg0, arg1)
-}
-
-// MockContractAccessDecisionManagerClient is a mock of ContractAccessDecisionManagerClient interface
-type MockContractAccessDecisionManagerClient struct {
-	ctrl     *gomock.Controller
-	recorder *MockContractAccessDecisionManagerClientMockRecorder
-}
-
-// MockContractAccessDecisionManagerClientMockRecorder is the mock recorder for MockContractAccessDecisionManagerClient
-type MockContractAccessDecisionManagerClientMockRecorder struct {
-	mock *MockContractAccessDecisionManagerClient
-}
-
-// NewMockContractAccessDecisionManagerClient creates a new mock instance
-func NewMockContractAccessDecisionManagerClient(ctrl *gomock.Controller) *MockContractAccessDecisionManagerClient {
-	mock := &MockContractAccessDecisionManagerClient{ctrl: ctrl}
-	mock.recorder = &MockContractAccessDecisionManagerClientMockRecorder{mock}
-	return mock
-}
-
-// EXPECT returns an object that allows the caller to indicate expected use
-func (m *MockContractAccessDecisionManagerClient) EXPECT() *MockContractAccessDecisionManagerClientMockRecorder {
-	return m.recorder
-}
-
-// AuthorizeContractAccess mocks base method
-func (m *MockContractAccessDecisionManagerClient) AuthorizeContractAccess(ctx context.Context, in *proto.ContractAccess_Request, opts ...grpc.CallOption) (*proto.ContractAccess_Response, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, in}
-	for _, a := range opts {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "AuthorizeContractAccess", varargs...)
-	ret0, _ := ret[0].(*proto.ContractAccess_Response)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// AuthorizeContractAccess indicates an expected call of AuthorizeContractAccess
-func (mr *MockContractAccessDecisionManagerClientMockRecorder) AuthorizeContractAccess(ctx, in interface{}, opts ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, in}, opts...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AuthorizeContractAccess", reflect.TypeOf((*MockContractAccessDecisionManagerClient)(nil).AuthorizeContractAccess), varargs...)
-}
-
-// MockContractAccessDecisionManagerServer is a mock of ContractAccessDecisionManagerServer interface
-type MockContractAccessDecisionManagerServer struct {
-	ctrl     *gomock.Controller
-	recorder *MockContractAccessDecisionManagerServerMockRecorder
-}
-
-// MockContractAccessDecisionManagerServerMockRecorder is the mock recorder for MockContractAccessDecisionManagerServer
-type MockContractAccessDecisionManagerServerMockRecorder struct {
-	mock *MockContractAccessDecisionManagerServer
-}
-
-// NewMockContractAccessDecisionManagerServer creates a new mock instance
-func NewMockContractAccessDecisionManagerServer(ctrl *gomock.Controller) *MockContractAccessDecisionManagerServer {
-	mock := &MockContractAccessDecisionManagerServer{ctrl: ctrl}
-	mock.recorder = &MockContractAccessDecisionManagerServerMockRecorder{mock}
-	return mock
-}
-
-// EXPECT returns an object that allows the caller to indicate expected use
-func (m *MockContractAccessDecisionManagerServer) EXPECT() *MockContractAccessDecisionManagerServerMockRecorder {
-	return m.recorder
-}
-
-// AuthorizeContractAccess mocks base method
-func (m *MockContractAccessDecisionManagerServer) AuthorizeContractAccess(arg0 context.Context, arg1 *proto.ContractAccess_Request) (*proto.ContractAccess_Response, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "AuthorizeContractAccess", arg0, arg1)
-	ret0, _ := ret[0].(*proto.ContractAccess_Response)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// AuthorizeContractAccess indicates an expected call of AuthorizeContractAccess
-func (mr *MockContractAccessDecisionManagerServerMockRecorder) AuthorizeContractAccess(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AuthorizeContractAccess", reflect.TypeOf((*MockContractAccessDecisionManagerServer)(nil).AuthorizeContractAccess), arg0, arg1)
 }
